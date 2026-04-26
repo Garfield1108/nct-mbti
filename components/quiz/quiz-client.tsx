@@ -1,0 +1,229 @@
+"use client";
+
+import { useState, useSyncExternalStore, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "@/components/locale-provider";
+import { QUESTIONS } from "@/data/questions";
+import { countAnsweredQuestions, computeQuizResult } from "@/lib/scoring";
+import {
+  formatProgressAriaLabel,
+  formatQuestionProgress,
+  pickLocalizedText,
+} from "@/lib/locale";
+import {
+  createEmptyQuizState,
+  loadQuizState,
+  saveQuizResult,
+  saveQuizState,
+  shouldStartFreshQuiz,
+} from "@/lib/storage";
+import type { StoredQuizState } from "@/lib/types";
+import { Button } from "@/components/ui/button";
+import { ProgressBar } from "@/components/ui/progress-bar";
+
+const LETTERS = ["A", "B", "C", "D"] as const;
+
+export function QuizClient() {
+  const router = useRouter();
+  const { locale, t } = useTranslations();
+  const [quizState, setQuizState] = useState<StoredQuizState>(() => {
+    if (typeof window === "undefined") {
+      return createEmptyQuizState();
+    }
+
+    const storedState = loadQuizState();
+    if (!storedState || shouldStartFreshQuiz(storedState)) {
+      return createEmptyQuizState();
+    }
+
+    return {
+      ...storedState,
+      currentIndex: Math.min(storedState.currentIndex, QUESTIONS.length - 1),
+    };
+  });
+  const [isPending, startTransition] = useTransition();
+  const hasHydrated = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+
+  const currentQuestion = QUESTIONS[quizState.currentIndex];
+  const selectedOptionId = currentQuestion
+    ? quizState.answers[currentQuestion.id]
+    : undefined;
+  const answeredCount = countAnsweredQuestions(quizState.answers, QUESTIONS);
+
+  const updateQuizState = (nextState: StoredQuizState) => {
+    setQuizState(nextState);
+    saveQuizState(nextState);
+  };
+
+  const handleSelect = (optionId: string) => {
+    if (!currentQuestion) {
+      return;
+    }
+
+    updateQuizState({
+      ...quizState,
+      answers: {
+        ...quizState.answers,
+        [currentQuestion.id]: optionId,
+      },
+      resultId: null,
+      startedAt: quizState.startedAt ?? new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+  };
+
+  const handlePrevious = () => {
+    updateQuizState({
+      ...quizState,
+      currentIndex: Math.max(0, quizState.currentIndex - 1),
+      updatedAt: new Date().toISOString(),
+    });
+  };
+
+  const handleNext = () => {
+    if (!currentQuestion || !selectedOptionId) {
+      return;
+    }
+
+    if (quizState.currentIndex === QUESTIONS.length - 1) {
+      const computation = computeQuizResult(quizState.answers, QUESTIONS);
+      const nextState = saveQuizResult(
+        computation.result.id,
+        quizState.answers,
+        quizState.currentIndex,
+        quizState,
+      );
+
+      setQuizState(nextState);
+      startTransition(() => {
+        router.push(`/result/${computation.result.id}`);
+      });
+
+      return;
+    }
+
+    updateQuizState({
+      ...quizState,
+      currentIndex: Math.min(QUESTIONS.length - 1, quizState.currentIndex + 1),
+      updatedAt: new Date().toISOString(),
+    });
+  };
+
+  if (!hasHydrated || !currentQuestion) {
+    return (
+      <div className="flex min-h-[calc(100svh-53px)] items-center justify-center px-5 py-12 sm:min-h-[calc(100svh-61px)]">
+        <div className="rounded-full bg-[var(--surface-soft)] px-4 py-2 text-sm text-[var(--muted)]">
+          {t("restoringProgress")}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-4 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] pt-3 sm:px-5 sm:pb-8 sm:pt-4">
+      <div className="mx-auto w-full max-w-[31rem] space-y-2.5">
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-start gap-3 text-[0.72rem] font-medium tracking-[0.04em] text-[var(--muted)] sm:text-xs">
+            <span>
+              {formatQuestionProgress(
+                locale,
+                quizState.currentIndex + 1,
+                QUESTIONS.length,
+              )}
+            </span>
+          </div>
+          <ProgressBar
+            current={answeredCount}
+            total={QUESTIONS.length}
+            label={formatProgressAriaLabel(locale, answeredCount, QUESTIONS.length)}
+          />
+        </div>
+
+        <section className="rounded-[26px] border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[0_16px_40px_rgba(28,40,35,0.05)] sm:rounded-[28px] sm:p-6">
+          <div className="space-y-2.5">
+            <h1 className="text-[1.22rem] font-semibold leading-[1.28] text-[var(--ink)] sm:text-[1.5rem]">
+              {pickLocalizedText(
+                locale,
+                currentQuestion.prompt,
+                currentQuestion.promptEn,
+              )}
+            </h1>
+          </div>
+
+          <div className="mt-5 grid gap-2.5 sm:mt-6">
+            {currentQuestion.options.map((item, index) => {
+              const isActive = item.id === selectedOptionId;
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => handleSelect(item.id)}
+                  className={[
+                    "group flex w-full items-start gap-3 rounded-[18px] border px-4 py-3 text-left transition-all duration-200",
+                    isActive
+                      ? "border-[#8eb7a0] bg-[#eff7f2] shadow-[0_8px_22px_rgba(47,109,85,0.08)]"
+                      : "border-[var(--line)] bg-white hover:border-[#bfd3c7] hover:bg-[#f7fbf8]",
+                  ].join(" ")}
+                >
+                  <span
+                    className={[
+                      "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[0.72rem] font-semibold ring-1 transition-colors",
+                      isActive
+                        ? "bg-[#2f6d55] text-white ring-[#2f6d55]/15"
+                        : "bg-[var(--surface-soft)] text-[var(--ink-soft)] ring-[var(--line)]",
+                    ].join(" ")}
+                  >
+                    {LETTERS[index]}
+                  </span>
+                  <span className="min-w-0 space-y-0.5">
+                    <span className="block text-[0.95rem] font-medium leading-5 text-[var(--ink)]">
+                      {pickLocalizedText(locale, item.label, item.labelEn)}
+                    </span>
+                    {item.note ? (
+                      <span className="hidden text-[0.82rem] leading-5 text-[var(--muted)] sm:block">
+                        {pickLocalizedText(locale, item.note, item.noteEn)}
+                      </span>
+                    ) : null}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="mt-8 grid gap-2.5 sm:mt-9">
+            <Button
+              type="button"
+              variant="secondary"
+              size="md"
+              onClick={handlePrevious}
+              disabled={quizState.currentIndex === 0 || isPending}
+              fullWidth
+              className="h-12"
+            >
+              {t("previous")}
+            </Button>
+            <Button
+              type="button"
+              onClick={handleNext}
+              disabled={!selectedOptionId || isPending}
+              fullWidth
+              size="md"
+              className="h-12 bg-[#2f6d55] hover:bg-[#285d49] shadow-[0_10px_24px_rgba(47,109,85,0.18)] disabled:bg-[#ebefec] disabled:text-[#9aa49f] disabled:ring-[#dbe4df] disabled:shadow-none"
+            >
+              {quizState.currentIndex === QUESTIONS.length - 1
+                ? isPending
+                  ? t("generatingResult")
+                  : t("viewResult")
+                : t("next")}
+            </Button>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
