@@ -10,6 +10,14 @@ type ResultPageProps = {
   params: Promise<{ id: string }>;
 };
 
+export function generateStaticParams() {
+  return Object.keys(RESULTS_BY_ID).map((id) => ({
+    id,
+  }));
+}
+
+export const dynamicParams = false;
+
 export async function generateMetadata({
   params,
 }: ResultPageProps): Promise<Metadata> {
