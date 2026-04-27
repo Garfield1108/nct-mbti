@@ -1,5 +1,6 @@
 import { PAIR_PROFILES } from "@/data/pair-profiles";
 import { RESULT_COPY_EN } from "@/data/results-en";
+import { RESULT_COPY_KO } from "@/data/results-ko";
 import type { ResultId, ResultPalette, ResultProfile } from "@/lib/types";
 
 const palette = (
@@ -171,6 +172,7 @@ const splitPair = (pair: string): [string, string] => {
 export const RESULTS: ResultProfile[] = PAIR_PROFILES.map((profile) => ({
   ...profile,
   ...RESULT_COPY_EN[profile.id],
+  ...RESULT_COPY_KO[profile.id],
   members: splitPair(profile.pair),
   imagePath: resultImageMap[profile.id],
   ...presentationById[profile.id],

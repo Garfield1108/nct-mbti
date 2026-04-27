@@ -23,16 +23,27 @@ export interface ResultIllustration {
 
 export type ResultProfile = PairProfileSource & {
   typeNameEn?: string;
+  typeNameKo?: string;
   oneLineEn?: string;
+  oneLineKo?: string;
   narrativeEn?: string;
+  narrativeKo?: string;
   coreVibeEn?: readonly string[];
+  coreVibeKo?: readonly string[];
   attractionStyleEn?: readonly string[];
+  attractionStyleKo?: readonly string[];
   relationshipTempoEn?: readonly string[];
+  relationshipTempoKo?: readonly string[];
   affectionStyleEn?: readonly string[];
+  affectionStyleKo?: readonly string[];
   conflictStyleEn?: readonly string[];
+  conflictStyleKo?: readonly string[];
   securityNeedEn?: readonly string[];
+  securityNeedKo?: readonly string[];
   weakPointsEn?: readonly string[];
+  weakPointsKo?: readonly string[];
   idealDateEn?: readonly string[];
+  idealDateKo?: readonly string[];
   scoringHintsEn?: readonly string[];
   members: [string, string];
   imagePath: string;
@@ -46,8 +57,10 @@ export interface QuizOption {
   id: string;
   label: string;
   labelEn?: string;
+  labelKo?: string;
   note?: string;
   noteEn?: string;
+  noteKo?: string;
   weights: OptionWeights;
 }
 
@@ -56,6 +69,7 @@ export interface QuizQuestion {
   category: "social" | "emotion" | "conflict" | "affection" | "rhythm";
   prompt: string;
   promptEn?: string;
+  promptKo?: string;
   options: [QuizOption, QuizOption, QuizOption, QuizOption];
 }
 

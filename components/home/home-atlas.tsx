@@ -2,11 +2,9 @@
 
 import { AtlasGrid } from "@/components/atlas/atlas-grid";
 import { useTranslations } from "@/components/locale-provider";
-import { RESULT_COUNT } from "@/data/results";
-import { formatAtlasSubtitle } from "@/lib/locale";
 
 export function HomeAtlas() {
-  const { locale, t } = useTranslations();
+  const { t } = useTranslations();
 
   return (
     <section
@@ -15,12 +13,9 @@ export function HomeAtlas() {
     >
       <div className="mx-auto w-full max-w-[74rem]">
         <div className="mx-auto max-w-[30rem] text-center">
-          <h2 className="text-[2rem] font-extrabold leading-[1.08] tracking-[-0.03em] text-[#17231f] sm:text-[2.5rem]">
+          <h2 className="font-serif text-[2.1rem] font-semibold leading-[1.02] tracking-[-0.045em] text-[#17231f] sm:text-[2.7rem]">
             {t("atlasTitle")}
           </h2>
-          <p className="mt-3 text-[0.95rem] font-semibold text-[#5f7468] sm:text-[1rem]">
-            {formatAtlasSubtitle(locale, RESULT_COUNT)}
-          </p>
         </div>
 
         <AtlasGrid className="mt-8 sm:mt-10" />

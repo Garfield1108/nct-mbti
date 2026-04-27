@@ -60,7 +60,7 @@ export function AtlasClient() {
           </div>
 
           <div className="mt-7 text-center sm:mt-8">
-            <h1 className="text-[1.9rem] font-semibold tracking-[-0.02em] text-[var(--ink)] sm:text-[2.2rem]">
+            <h1 className="font-serif text-[2.05rem] font-semibold leading-[1.02] tracking-[-0.045em] text-[var(--ink)] sm:text-[2.5rem]">
               {t("atlasTitle")}
             </h1>
             <p className="mt-2 text-[0.96rem] font-medium text-[var(--muted)] sm:text-[1rem]">

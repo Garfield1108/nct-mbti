@@ -1,5 +1,6 @@
 import type { OptionWeights, QuizOption, QuizQuestion, TraitTag } from "@/lib/types";
 import { QUESTION_TRANSLATIONS_EN } from "@/data/questions-en";
+import { QUESTION_TRANSLATIONS_KO } from "@/data/questions-ko";
 
 const weights = (...entries: [TraitTag, number][]): OptionWeights =>
   Object.fromEntries(entries) as OptionWeights;
@@ -645,17 +646,23 @@ const questions: QuizQuestion[] = [
 
 export const QUESTIONS: QuizQuestion[] = questions.map((question) => {
   const questionTranslation = QUESTION_TRANSLATIONS_EN[question.id];
+  const questionTranslationKo = QUESTION_TRANSLATIONS_KO[question.id];
 
   return {
     ...question,
     promptEn: questionTranslation?.prompt ?? question.promptEn ?? question.prompt,
+    promptKo:
+      questionTranslationKo?.prompt ?? question.promptKo ?? question.prompt,
     options: question.options.map((item) => {
       const optionTranslation = questionTranslation?.options[item.id];
+      const optionTranslationKo = questionTranslationKo?.options[item.id];
 
       return {
         ...item,
         labelEn: optionTranslation?.label ?? item.labelEn ?? item.label,
+        labelKo: optionTranslationKo?.label ?? item.labelKo ?? item.label,
         noteEn: optionTranslation?.note ?? item.noteEn ?? item.note,
+        noteKo: optionTranslationKo?.note ?? item.noteKo ?? item.note,
       };
     }) as QuizQuestion["options"],
   };

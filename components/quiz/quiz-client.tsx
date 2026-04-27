@@ -163,6 +163,7 @@ export function QuizClient() {
                 locale,
                 currentQuestion.prompt,
                 currentQuestion.promptEn,
+                currentQuestion.promptKo,
               )}
             </h1>
           </div>
@@ -195,11 +196,21 @@ export function QuizClient() {
                   </span>
                   <span className="min-w-0 space-y-0.5">
                     <span className="block text-[0.95rem] font-medium leading-5 text-[var(--ink)]">
-                      {pickLocalizedText(locale, item.label, item.labelEn)}
+                      {pickLocalizedText(
+                        locale,
+                        item.label,
+                        item.labelEn,
+                        item.labelKo,
+                      )}
                     </span>
                     {item.note ? (
                       <span className="hidden text-[0.82rem] leading-5 text-[var(--muted)] sm:block">
-                        {pickLocalizedText(locale, item.note, item.noteEn)}
+                        {pickLocalizedText(
+                          locale,
+                          item.note,
+                          item.noteEn,
+                          item.noteKo,
+                        )}
                       </span>
                     ) : null}
                   </span>

@@ -28,37 +28,72 @@ export const getLocalizedResultContent = (
   result: ResultProfile,
   locale: Locale,
 ) => ({
-  typeName: pickLocalizedText(locale, result.typeName, result.typeNameEn),
-  oneLine: pickLocalizedText(locale, result.oneLine, result.oneLineEn),
-  narrative: pickLocalizedText(locale, result.narrative, result.narrativeEn),
-  coreVibe: pickLocalizedList(locale, result.coreVibe, result.coreVibeEn),
+  typeName: pickLocalizedText(
+    locale,
+    result.typeName,
+    result.typeNameEn,
+    result.typeNameKo,
+  ),
+  oneLine: pickLocalizedText(
+    locale,
+    result.oneLine,
+    result.oneLineEn,
+    result.oneLineKo,
+  ),
+  narrative: pickLocalizedText(
+    locale,
+    result.narrative,
+    result.narrativeEn,
+    result.narrativeKo,
+  ),
+  coreVibe: pickLocalizedList(
+    locale,
+    result.coreVibe,
+    result.coreVibeEn,
+    result.coreVibeKo,
+  ),
   attractionStyle: pickLocalizedList(
     locale,
     result.attractionStyle,
     result.attractionStyleEn,
+    result.attractionStyleKo,
   ),
   relationshipTempo: pickLocalizedList(
     locale,
     result.relationshipTempo,
     result.relationshipTempoEn,
+    result.relationshipTempoKo,
   ),
   affectionStyle: pickLocalizedList(
     locale,
     result.affectionStyle,
     result.affectionStyleEn,
+    result.affectionStyleKo,
   ),
   conflictStyle: pickLocalizedList(
     locale,
     result.conflictStyle,
     result.conflictStyleEn,
+    result.conflictStyleKo,
   ),
   securityNeed: pickLocalizedList(
     locale,
     result.securityNeed,
     result.securityNeedEn,
+    result.securityNeedKo,
   ),
-  weakPoints: pickLocalizedList(locale, result.weakPoints, result.weakPointsEn),
-  idealDate: pickLocalizedList(locale, result.idealDate, result.idealDateEn),
+  weakPoints: pickLocalizedList(
+    locale,
+    result.weakPoints,
+    result.weakPointsEn,
+    result.weakPointsKo,
+  ),
+  idealDate: pickLocalizedList(
+    locale,
+    result.idealDate,
+    result.idealDateEn,
+    result.idealDateKo,
+  ),
   scoringHints:
     locale === "en"
       ? result.scoringHintsEn ??
