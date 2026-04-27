@@ -36,7 +36,8 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
-    document.documentElement.lang = locale === "en" ? "en" : "zh-CN";
+    document.documentElement.lang =
+      locale === "en" ? "en" : locale === "ko" ? "ko" : "zh-CN";
   }, [locale]);
 
   return (

@@ -12,6 +12,7 @@ export default function AtlasPage() {
     <PageShell
       headerTitle="NCT CP 人格测试结果图鉴"
       headerTitleEn="NCT CP Result Atlas"
+      headerTitleKo="NCT CP 결과 도감"
     >
       <AtlasClient />
     </PageShell>

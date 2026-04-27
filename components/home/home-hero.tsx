@@ -59,6 +59,21 @@ function StepArrow() {
   );
 }
 
+function ChevronDown() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+      <path
+        d="M6 9L12 15L18 9"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function HomeHero() {
   const { locale, t } = useTranslations();
   const chestRef = useRef<HTMLDivElement>(null);
@@ -86,6 +101,13 @@ export function HomeHero() {
     chestRef.current.style.transform = "";
   };
 
+  const scrollToAtlas = () => {
+    document.getElementById("result-atlas")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
+
   return (
     <section className="relative min-h-screen overflow-hidden bg-white">
       <div className="pointer-events-none absolute inset-0">
@@ -107,8 +129,8 @@ export function HomeHero() {
       </div>
 
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[450px] flex-col items-center px-6 pb-8 pt-10 text-center">
-        <header className="mb-10 flex w-full items-start justify-between gap-4">
-          <div className="inline-block rounded-full bg-[var(--home-cream)] px-3.5 py-1.5 text-[0.72rem] font-bold tracking-[0.05em] text-[var(--home-accent-dark)]">
+        <header className="mb-10 flex w-full items-start justify-between gap-3">
+          <div className="inline-block rounded-full bg-[var(--home-cream)] px-3 py-1.5 text-[0.68rem] font-bold tracking-[0.05em] text-[var(--home-accent-dark)] sm:px-3.5 sm:text-[0.72rem]">
             {t("siteSubtitle")}
           </div>
           <LanguageSwitcher />
@@ -225,6 +247,18 @@ export function HomeHero() {
             >
               {t("startTest")}
             </Link>
+
+            <button
+              type="button"
+              onClick={scrollToAtlas}
+              className="group mt-5 inline-flex flex-col items-center gap-1.5 bg-transparent p-0 text-center text-[13px] font-semibold text-[rgba(47,111,85,0.68)] transition-colors hover:text-[#2f6d55] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(47,111,85,0.2)] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+              aria-label={t("atlasScrollHint")}
+            >
+              <span>{t("atlasScrollHint")}</span>
+              <span className="scroll-hint-chevron text-[rgba(47,111,85,0.76)]">
+                <ChevronDown />
+              </span>
+            </button>
           </div>
 
           <p className="mt-10 text-[11px] leading-[1.4] tracking-[0.01em] text-[#a2aba5]">

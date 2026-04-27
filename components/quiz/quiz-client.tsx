@@ -26,6 +26,7 @@ const LETTERS = ["A", "B", "C", "D"] as const;
 export function QuizClient() {
   const router = useRouter();
   const { locale, t } = useTranslations();
+  const [isSubmittingResult, setIsSubmittingResult] = useState(false);
   const [quizState, setQuizState] = useState<StoredQuizState>(() => {
     if (typeof window === "undefined") {
       return createEmptyQuizState();
@@ -53,6 +54,7 @@ export function QuizClient() {
     ? quizState.answers[currentQuestion.id]
     : undefined;
   const answeredCount = countAnsweredQuestions(quizState.answers, QUESTIONS);
+  const isActionPending = isPending || isSubmittingResult;
 
   const updateQuizState = (nextState: StoredQuizState) => {
     setQuizState(nextState);
@@ -90,17 +92,28 @@ export function QuizClient() {
     }
 
     if (quizState.currentIndex === QUESTIONS.length - 1) {
-      const computation = computeQuizResult(quizState.answers, QUESTIONS);
-      const nextState = saveQuizResult(
-        computation.result.id,
-        quizState.answers,
-        quizState.currentIndex,
-        quizState,
-      );
+      if (isActionPending) {
+        return;
+      }
 
-      setQuizState(nextState);
-      startTransition(() => {
-        router.push(`/result/${computation.result.id}`);
+      setIsSubmittingResult(true);
+      window.requestAnimationFrame(() => {
+        try {
+          const computation = computeQuizResult(quizState.answers, QUESTIONS);
+          const nextState = saveQuizResult(
+            computation.result.id,
+            quizState.answers,
+            quizState.currentIndex,
+            quizState,
+          );
+
+          setQuizState(nextState);
+          startTransition(() => {
+            router.push(`/result/${computation.result.id}`);
+          });
+        } catch {
+          setIsSubmittingResult(false);
+        }
       });
 
       return;
@@ -201,7 +214,7 @@ export function QuizClient() {
               variant="secondary"
               size="md"
               onClick={handlePrevious}
-              disabled={quizState.currentIndex === 0 || isPending}
+              disabled={quizState.currentIndex === 0 || isActionPending}
               fullWidth
               className="h-12"
             >
@@ -210,14 +223,19 @@ export function QuizClient() {
             <Button
               type="button"
               onClick={handleNext}
-              disabled={!selectedOptionId || isPending}
+              disabled={!selectedOptionId || isActionPending}
               fullWidth
               size="md"
               className="h-12 bg-[#2f6d55] hover:bg-[#285d49] shadow-[0_10px_24px_rgba(47,109,85,0.18)] disabled:bg-[#ebefec] disabled:text-[#9aa49f] disabled:ring-[#dbe4df] disabled:shadow-none"
             >
               {quizState.currentIndex === QUESTIONS.length - 1
-                ? isPending
-                  ? t("generatingResult")
+                ? isActionPending
+                  ? (
+                    <span className="inline-flex items-center gap-2 text-center text-[0.92rem] sm:text-[0.96rem]">
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/35 border-t-white" />
+                      {t("generatingResult")}
+                    </span>
+                  )
                   : t("viewResult")
                 : t("next")}
             </Button>

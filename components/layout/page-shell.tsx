@@ -6,12 +6,14 @@ interface PageShellProps {
   children: ReactNode;
   headerTitle?: string;
   headerTitleEn?: string;
+  headerTitleKo?: string;
 }
 
 export function PageShell({
   children,
   headerTitle,
   headerTitleEn,
+  headerTitleKo,
 }: PageShellProps) {
   return (
     <div className="relative min-h-screen overflow-hidden px-2.5 py-2.5 sm:px-4 sm:py-4">
@@ -23,6 +25,7 @@ export function PageShell({
               showSubtitle={false}
               title={headerTitle}
               titleEn={headerTitleEn}
+              titleKo={headerTitleKo}
               className="text-sm font-semibold tracking-[0.08em] text-[var(--ink)]"
             />
             <div className="flex justify-end">

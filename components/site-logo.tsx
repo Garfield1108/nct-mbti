@@ -10,6 +10,7 @@ interface SiteLogoProps {
   stacked?: boolean;
   title?: string;
   titleEn?: string;
+  titleKo?: string;
 }
 
 export function SiteLogo({
@@ -19,10 +20,15 @@ export function SiteLogo({
   stacked = false,
   title,
   titleEn,
+  titleKo,
 }: SiteLogoProps) {
   const { locale, t } = useTranslations();
   const displayTitle =
-    locale === "en" ? titleEn ?? title ?? t("siteTitle") : title ?? t("siteTitle");
+    locale === "en"
+      ? titleEn ?? title ?? titleKo ?? t("siteTitle")
+      : locale === "ko"
+        ? titleKo ?? title ?? titleEn ?? t("siteTitle")
+        : title ?? titleEn ?? titleKo ?? t("siteTitle");
 
   return (
     <Link

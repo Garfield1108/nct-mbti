@@ -1,14 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, useSyncExternalStore, useTransition } from "react";
+import { useEffect, useSyncExternalStore, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "@/components/locale-provider";
 import { RESULTS } from "@/data/results";
 import { getLocalizedResultContent } from "@/lib/result-localization";
 import { computeQuizResult } from "@/lib/scoring";
 import { clearQuizState, loadQuizState } from "@/lib/storage";
-import { downloadResultPoster } from "@/lib/share-card";
 import type { RankedResult, ResultProfile } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { ResultVisual } from "@/components/result/result-visual";
@@ -72,7 +71,6 @@ function QuickReadCard({
 export function ResultClient({ result }: ResultClientProps) {
   const router = useRouter();
   const { locale, t } = useTranslations();
-  const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const hasHydrated = useSyncExternalStore(
     () => () => {},
@@ -128,15 +126,6 @@ export function ResultClient({ result }: ResultClientProps) {
     });
   };
 
-  const handleDownload = async () => {
-    try {
-      await downloadResultPoster(result.id);
-      setStatusMessage(t("downloadStarted"));
-    } catch {
-      setStatusMessage(t("downloadFailed"));
-    }
-  };
-
   return (
     <div className="overflow-x-hidden px-4 py-4 sm:px-5 sm:py-6">
       <div className="mx-auto grid w-full max-w-[62rem] gap-4 sm:gap-5">
@@ -160,30 +149,22 @@ export function ResultClient({ result }: ResultClientProps) {
                 {localizedResult.oneLine}
               </p>
 
-              <div className="mx-auto mt-5 grid w-full max-w-[28rem] grid-cols-2 gap-3 lg:mx-0">
+              <div className="mx-auto mt-5 flex w-full max-w-[20rem] justify-center lg:mx-0">
                 <Button
                   type="button"
-                  onClick={handleDownload}
-                  fullWidth
-                  className="h-[3.25rem]"
-                >
-                  {t("saveImage")}
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
                   onClick={handleRetake}
                   disabled={isPending}
                   fullWidth
-                  className="h-[3.25rem] bg-white/88 text-[#2f6f55] ring-[rgba(47,111,85,0.16)] shadow-[0_8px_18px_rgba(28,40,35,0.05)] hover:bg-white"
+                  className="mx-auto h-[3.25rem] max-w-[20rem] bg-[#2f6d55] text-white shadow-[0_10px_24px_rgba(47,109,85,0.18)] hover:bg-[#285d49]"
                 >
-                  {isPending ? t("returning") : t("retakeTest")}
+                  <span className="inline-flex items-center gap-2">
+                    {isPending ? (
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/35 border-t-white" />
+                    ) : null}
+                    {t("retakeTest")}
+                  </span>
                 </Button>
               </div>
-
-              {statusMessage ? (
-                <p className="mt-3 text-sm text-[var(--muted)]">{statusMessage}</p>
-              ) : null}
             </div>
           </div>
         </section>

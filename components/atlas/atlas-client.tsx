@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { AtlasGrid } from "@/components/atlas/atlas-grid";
 import { useTranslations } from "@/components/locale-provider";
+import { RESULT_COUNT } from "@/data/results";
+import { formatAtlasSubtitle } from "@/lib/locale";
 import { clearQuizState } from "@/lib/storage";
 import { buttonClasses } from "@/components/ui/button";
 
@@ -22,7 +24,7 @@ function BackArrow() {
 }
 
 export function AtlasClient() {
-  const { t } = useTranslations();
+  const { locale, t } = useTranslations();
 
   return (
     <div
@@ -55,6 +57,15 @@ export function AtlasClient() {
                 {t("startTest")}
               </Link>
             </div>
+          </div>
+
+          <div className="mt-7 text-center sm:mt-8">
+            <h1 className="text-[1.9rem] font-semibold tracking-[-0.02em] text-[var(--ink)] sm:text-[2.2rem]">
+              {t("atlasTitle")}
+            </h1>
+            <p className="mt-2 text-[0.96rem] font-medium text-[var(--muted)] sm:text-[1rem]">
+              {formatAtlasSubtitle(locale, RESULT_COUNT)}
+            </p>
           </div>
 
           <AtlasGrid className="mt-6 sm:mt-7" />

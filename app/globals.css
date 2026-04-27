@@ -82,8 +82,43 @@ button {
   }
 }
 
+@keyframes soft-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes soft-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+
 .neo-rock {
   animation: neo-rock 6s ease-in-out infinite;
+}
+
+.soft-shimmer {
+  background:
+    linear-gradient(
+      110deg,
+      rgba(241, 246, 243, 0.96) 8%,
+      rgba(223, 234, 228, 0.92) 18%,
+      rgba(245, 248, 246, 0.96) 33%
+    );
+  background-size: 220% 100%;
+  animation: soft-shimmer 1.7s linear infinite;
+}
+
+.scroll-hint-chevron {
+  animation: soft-bob 1.6s ease-in-out infinite;
 }
 
 html.result-page-active nextjs-portal,

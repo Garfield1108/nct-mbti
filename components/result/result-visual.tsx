@@ -4,11 +4,8 @@ import Image from "next/image";
 import { useState } from "react";
 import { useTranslations } from "@/components/locale-provider";
 import { DuoIllustration } from "@/components/duo-illustration";
-import {
-  getIllustrationAltText,
-  getPosterAltText,
-} from "@/lib/locale";
-import { getLocalizedResultPosterPath } from "@/lib/share-card";
+import { getIllustrationAltText, getPosterAltText } from "@/lib/locale";
+import { getResultPosterPath } from "@/lib/share-card";
 import type { ResultProfile } from "@/lib/types";
 
 interface ResultVisualProps {
@@ -24,8 +21,10 @@ const variantClasses: Record<NonNullable<ResultVisualProps["variant"]>, string> 
 };
 
 const frameClasses = {
-  hero: "aspect-[1122/1402]",
-  card: "aspect-[1122/1402]",
+  hero:
+    "relative aspect-[1122/1402] overflow-hidden rounded-[20px] bg-[linear-gradient(180deg,#f7faf8_0%,#eef4f0_100%)]",
+  card:
+    "relative aspect-[1122/1402] overflow-hidden rounded-[14px] bg-[linear-gradient(180deg,#f7faf8_0%,#eef4f0_100%)] sm:rounded-[16px]",
 } as const;
 
 const imageDimensions = {
@@ -37,14 +36,12 @@ export function ResultVisual({
   result,
   variant = "hero",
 }: ResultVisualProps) {
-  const { locale } = useTranslations();
+  const { locale, t } = useTranslations();
+  const [isLoaded, setIsLoaded] = useState(false);
   const [hasImageError, setHasImageError] = useState(false);
-  const posterSrc = getLocalizedResultPosterPath({
-    resultId: result.id,
-    locale,
-    hasEnglishPoster: result.hasEnglishPoster,
-  });
+  const posterSrc = getResultPosterPath(result.id);
   const shouldShowFallback = hasImageError || !posterSrc;
+  const showLoadingState = !shouldShowFallback && !isLoaded;
 
   return (
     <div className={variantClasses[variant]}>
@@ -54,19 +51,42 @@ export function ResultVisual({
             result={result}
             label={getIllustrationAltText(locale, result.pair)}
           />
+          {variant === "hero" ? (
+            <div className="absolute inset-x-4 bottom-4 rounded-[18px] bg-white/92 px-3 py-2.5 text-center text-sm font-medium text-[var(--muted)] shadow-[0_8px_18px_rgba(28,40,35,0.06)]">
+              {t("resultPosterLoadFailed")}
+            </div>
+          ) : null}
         </div>
       ) : (
-        <Image
-          src={posterSrc}
-          alt={getPosterAltText(locale, result.pair)}
-          width={imageDimensions[variant].width}
-          height={imageDimensions[variant].height}
-          sizes={imageDimensions[variant].sizes}
-          priority={variant === "hero"}
-          onError={() => setHasImageError(true)}
-          style={{ width: "100%", height: "auto", maxWidth: "100%" }}
-          className="block max-w-full rounded-[20px] object-contain object-center"
-        />
+        <div className={frameClasses[variant]}>
+          <Image
+            src={posterSrc}
+            alt={getPosterAltText(locale, result.pair)}
+            width={imageDimensions[variant].width}
+            height={imageDimensions[variant].height}
+            sizes={imageDimensions[variant].sizes}
+            priority={variant === "hero"}
+            onLoad={() => setIsLoaded(true)}
+            onError={() => setHasImageError(true)}
+            style={{ width: "100%", height: "auto", maxWidth: "100%" }}
+            className={`block max-w-full object-contain object-center transition-opacity duration-300 ${
+              isLoaded ? "opacity-100" : "opacity-0"
+            }`}
+          />
+          {showLoadingState ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+              <div className="soft-shimmer absolute inset-0" aria-hidden="true" />
+              {variant === "hero" ? (
+                <>
+                  <span className="relative h-7 w-7 animate-spin rounded-full border-2 border-[#8eb7a0]/35 border-t-[#2f6d55]" />
+                  <p className="relative px-4 text-center text-sm font-medium text-[var(--muted)]">
+                    {t("loadingResultPoster")}
+                  </p>
+                </>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
       )}
     </div>
   );

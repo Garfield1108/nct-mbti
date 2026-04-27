@@ -34,7 +34,6 @@ export type ResultProfile = PairProfileSource & {
   weakPointsEn?: readonly string[];
   idealDateEn?: readonly string[];
   scoringHintsEn?: readonly string[];
-  hasEnglishPoster?: boolean;
   members: [string, string];
   imagePath: string;
   palette: ResultPalette;
