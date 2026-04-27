@@ -39,8 +39,9 @@ export function ResultVisual({
   const { locale, t } = useTranslations();
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasImageError, setHasImageError] = useState(false);
-  const posterSrc = getResultPosterPath(result.id);
-  const shouldShowFallback = hasImageError || !posterSrc;
+  const shouldUsePoster = variant === "hero";
+  const posterSrc = shouldUsePoster ? getResultPosterPath(result.id) : null;
+  const shouldShowFallback = !shouldUsePoster || hasImageError || !posterSrc;
   const showLoadingState = !shouldShowFallback && !isLoaded;
 
   return (
@@ -65,11 +66,10 @@ export function ResultVisual({
             width={imageDimensions[variant].width}
             height={imageDimensions[variant].height}
             sizes={imageDimensions[variant].sizes}
-            priority={variant === "hero"}
+            priority
             onLoad={() => setIsLoaded(true)}
             onError={() => setHasImageError(true)}
-            style={{ width: "100%", height: "auto", maxWidth: "100%" }}
-            className={`block max-w-full object-contain object-center transition-opacity duration-300 ${
+            className={`block h-full w-full object-contain object-center transition-opacity duration-300 ${
               isLoaded ? "opacity-100" : "opacity-0"
             }`}
           />

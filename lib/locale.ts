@@ -56,6 +56,11 @@ const UI_TEXT = {
     en: "Start Test",
     ko: "테스트 시작",
   },
+  openingTest: {
+    zh: "正在进入测试…",
+    en: "Opening the test…",
+    ko: "테스트로 이동하는 중…",
+  },
   backHome: {
     zh: "返回首页",
     en: "Back Home",

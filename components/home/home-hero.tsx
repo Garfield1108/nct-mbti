@@ -1,13 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useRef } from "react";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { useTranslations } from "@/components/locale-provider";
-import { buttonClasses } from "@/components/ui/button";
+import { StartTestButton } from "@/components/start-test-button";
 import { RESULT_COUNT } from "@/data/results";
 import { formatPairCount } from "@/lib/locale";
-import { clearQuizState } from "@/lib/storage";
 
 type SparkleConfig = {
   top?: string;
@@ -238,15 +236,11 @@ export function HomeHero() {
           </div>
 
           <div className="mt-2 flex w-full flex-col items-center px-2.5">
-            <Link
-              href="/quiz"
-              onClick={() => {
-                clearQuizState();
-              }}
-              className={`${buttonClasses({ size: "xl", fullWidth: true })} max-w-[20rem]`}
-            >
-              {t("startTest")}
-            </Link>
+            <StartTestButton
+              size="xl"
+              fullWidth
+              className="max-w-[20rem]"
+            />
 
             <button
               type="button"

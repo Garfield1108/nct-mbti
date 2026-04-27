@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { AtlasGrid } from "@/components/atlas/atlas-grid";
 import { useTranslations } from "@/components/locale-provider";
+import { StartTestButton } from "@/components/start-test-button";
 import { RESULT_COUNT } from "@/data/results";
 import { formatAtlasSubtitle } from "@/lib/locale";
-import { clearQuizState } from "@/lib/storage";
 import { buttonClasses } from "@/components/ui/button";
 
 function BackArrow() {
@@ -47,15 +47,7 @@ export function AtlasClient() {
                 </span>
                 {t("backHome")}
               </Link>
-              <Link
-                href="/quiz"
-                onClick={() => {
-                  clearQuizState();
-                }}
-                className={buttonClasses({ size: "md", fullWidth: true })}
-              >
-                {t("startTest")}
-              </Link>
+              <StartTestButton size="md" fullWidth />
             </div>
           </div>
 

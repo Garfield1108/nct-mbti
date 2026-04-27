@@ -17,11 +17,31 @@ import {
   saveQuizState,
   shouldStartFreshQuiz,
 } from "@/lib/storage";
+import { getResultPosterPath } from "@/lib/share-card";
 import type { StoredQuizState } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/ui/progress-bar";
 
 const LETTERS = ["A", "B", "C", "D"] as const;
+
+function preloadImage(src: string, timeout = 1500) {
+  return new Promise<void>((resolve) => {
+    const img = new window.Image();
+    const timer = window.setTimeout(resolve, timeout);
+
+    img.onload = () => {
+      window.clearTimeout(timer);
+      resolve();
+    };
+
+    img.onerror = () => {
+      window.clearTimeout(timer);
+      resolve();
+    };
+
+    img.src = src;
+  });
+}
 
 export function QuizClient() {
   const router = useRouter();
@@ -100,16 +120,19 @@ export function QuizClient() {
       window.requestAnimationFrame(() => {
         try {
           const computation = computeQuizResult(quizState.answers, QUESTIONS);
+          const resultId = computation.result.id;
           const nextState = saveQuizResult(
-            computation.result.id,
+            resultId,
             quizState.answers,
             quizState.currentIndex,
             quizState,
           );
 
           setQuizState(nextState);
-          startTransition(() => {
-            router.push(`/result/${computation.result.id}`);
+          void preloadImage(getResultPosterPath(resultId)).finally(() => {
+            startTransition(() => {
+              router.push(`/result/${resultId}`);
+            });
           });
         } catch {
           setIsSubmittingResult(false);
