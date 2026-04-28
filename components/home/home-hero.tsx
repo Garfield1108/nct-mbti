@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { useTranslations } from "@/components/locale-provider";
 import { RESULT_COUNT } from "@/data/results";
@@ -106,6 +106,20 @@ export function HomeHero() {
       block: "start",
     });
   };
+
+  useEffect(() => {
+    const resetStarting = () => {
+      setIsStarting(false);
+    };
+
+    window.addEventListener("pageshow", resetStarting);
+    window.addEventListener("focus", resetStarting);
+
+    return () => {
+      window.removeEventListener("pageshow", resetStarting);
+      window.removeEventListener("focus", resetStarting);
+    };
+  }, []);
 
   return (
     <section className="relative min-h-screen overflow-hidden bg-white">

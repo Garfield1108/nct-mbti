@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "@/components/locale-provider";
 import { QUESTIONS } from "@/data/questions";
@@ -69,6 +69,7 @@ export function QuizClient() {
   const router = useRouter();
   const { locale, t } = useTranslations();
   const [isSubmittingResult, setIsSubmittingResult] = useState(false);
+  const [isAdvancing, setIsAdvancing] = useState(false);
   const [quizState, setQuizState] = useState<StoredQuizState>(() => {
     if (typeof window === "undefined") {
       return createEmptyQuizState();
@@ -85,13 +86,29 @@ export function QuizClient() {
     };
   });
   const [isPending, startTransition] = useTransition();
+  const advanceTimerRef = useRef<number | null>(null);
 
   const currentQuestion = QUESTIONS[quizState.currentIndex];
   const selectedOptionId = currentQuestion
     ? quizState.answers[currentQuestion.id]
     : undefined;
   const answeredCount = countAnsweredQuestions(quizState.answers, QUESTIONS);
-  const isActionPending = isPending || isSubmittingResult;
+  const isActionPending = isPending || isSubmittingResult || isAdvancing;
+
+  useEffect(() => {
+    return () => {
+      if (advanceTimerRef.current !== null) {
+        window.clearTimeout(advanceTimerRef.current);
+      }
+    };
+  }, []);
+
+  const clearAdvanceTimer = () => {
+    if (advanceTimerRef.current !== null) {
+      window.clearTimeout(advanceTimerRef.current);
+      advanceTimerRef.current = null;
+    }
+  };
 
   const updateQuizState = (nextState: StoredQuizState) => {
     setQuizState(nextState);
@@ -99,11 +116,11 @@ export function QuizClient() {
   };
 
   const handleSelect = (optionId: string) => {
-    if (!currentQuestion) {
+    if (!currentQuestion || isActionPending) {
       return;
     }
 
-    updateQuizState({
+    const nextState = {
       ...quizState,
       answers: {
         ...quizState.answers,
@@ -112,59 +129,62 @@ export function QuizClient() {
       resultId: null,
       startedAt: quizState.startedAt ?? new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-    });
-  };
+    };
 
-  const handlePrevious = () => {
-    updateQuizState({
-      ...quizState,
-      currentIndex: Math.max(0, quizState.currentIndex - 1),
-      updatedAt: new Date().toISOString(),
-    });
-  };
+    updateQuizState(nextState);
+    setIsAdvancing(true);
+    clearAdvanceTimer();
 
-  const handleNext = () => {
-    if (!currentQuestion || !selectedOptionId) {
-      return;
-    }
+    advanceTimerRef.current = window.setTimeout(() => {
+      advanceTimerRef.current = null;
 
-    if (quizState.currentIndex === QUESTIONS.length - 1) {
-      if (isActionPending) {
+      if (quizState.currentIndex === QUESTIONS.length - 1) {
+        setIsAdvancing(false);
+        setIsSubmittingResult(true);
+
+        window.requestAnimationFrame(() => {
+          try {
+            const computation = computeQuizResult(nextState.answers, QUESTIONS);
+            const resultId = computation.result.id;
+            const resultState = saveQuizResult(
+              resultId,
+              nextState.answers,
+              nextState.currentIndex,
+              nextState,
+            );
+
+            setQuizState(resultState);
+            void preloadResultImage(
+              [getResultDisplayPosterSrc(resultId), getResultPosterSrc(resultId)],
+              1500,
+            ).finally(() => {
+              startTransition(() => {
+                router.push(`/result/${resultId}`);
+              });
+            });
+          } catch {
+            setIsSubmittingResult(false);
+          }
+        });
+
         return;
       }
 
-      setIsSubmittingResult(true);
-      window.requestAnimationFrame(() => {
-        try {
-          const computation = computeQuizResult(quizState.answers, QUESTIONS);
-          const resultId = computation.result.id;
-          const nextState = saveQuizResult(
-            resultId,
-            quizState.answers,
-            quizState.currentIndex,
-            quizState,
-          );
-
-          setQuizState(nextState);
-          void preloadResultImage(
-            [getResultDisplayPosterSrc(resultId), getResultPosterSrc(resultId)],
-            1500,
-          ).finally(() => {
-            startTransition(() => {
-              router.push(`/result/${resultId}`);
-            });
-          });
-        } catch {
-          setIsSubmittingResult(false);
-        }
+      updateQuizState({
+        ...nextState,
+        currentIndex: Math.min(QUESTIONS.length - 1, quizState.currentIndex + 1),
+        updatedAt: new Date().toISOString(),
       });
+      setIsAdvancing(false);
+    }, 220);
+  };
 
-      return;
-    }
-
+  const handlePrevious = () => {
+    clearAdvanceTimer();
+    setIsAdvancing(false);
     updateQuizState({
       ...quizState,
-      currentIndex: Math.min(QUESTIONS.length - 1, quizState.currentIndex + 1),
+      currentIndex: Math.max(0, quizState.currentIndex - 1),
       updatedAt: new Date().toISOString(),
     });
   };
@@ -220,11 +240,13 @@ export function QuizClient() {
                   key={item.id}
                   type="button"
                   onClick={() => handleSelect(item.id)}
+                  disabled={isActionPending}
                   className={[
                     "group flex w-full items-start gap-3 rounded-[18px] border px-4 py-3 text-left transition-all duration-200",
                     isActive
                       ? "border-[#8eb7a0] bg-[#eff7f2] shadow-[0_8px_22px_rgba(47,109,85,0.08)]"
                       : "border-[var(--line)] bg-white hover:border-[#bfd3c7] hover:bg-[#f7fbf8]",
+                    isActionPending ? "cursor-default" : "",
                   ].join(" ")}
                 >
                   <span
@@ -262,38 +284,28 @@ export function QuizClient() {
             })}
           </div>
 
-          <div className="mt-8 grid gap-2.5 sm:mt-9">
-            <Button
-              type="button"
-              variant="secondary"
-              size="md"
-              onClick={handlePrevious}
-              disabled={quizState.currentIndex === 0 || isActionPending}
-              fullWidth
-              className="h-12"
-            >
-              {t("previous")}
-            </Button>
-            <Button
-              type="button"
-              onClick={handleNext}
-              disabled={!selectedOptionId || isActionPending}
-              fullWidth
-              size="md"
-              className="h-12 bg-[#2f6d55] hover:bg-[#285d49] shadow-[0_10px_24px_rgba(47,109,85,0.18)] disabled:bg-[#ebefec] disabled:text-[#9aa49f] disabled:ring-[#dbe4df] disabled:shadow-none"
-            >
-              {quizState.currentIndex === QUESTIONS.length - 1
-                ? isActionPending
-                  ? (
-                    <span className="inline-flex items-center gap-2 text-center text-[0.92rem] sm:text-[0.96rem]">
-                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/35 border-t-white" />
-                      {t("generatingResult")}
-                    </span>
-                  )
-                  : t("viewResult")
-                : t("next")}
-            </Button>
-          </div>
+          {isSubmittingResult ? (
+            <div className="mt-8 flex justify-center sm:mt-9">
+              <div className="inline-flex items-center gap-2 rounded-full bg-[#eff7f2] px-4 py-2 text-[0.92rem] font-medium text-[#2f6d55] shadow-[0_8px_20px_rgba(47,109,85,0.08)]">
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#2f6d55]/25 border-t-[#2f6d55]" />
+                {t("generatingResult")}
+              </div>
+            </div>
+          ) : quizState.currentIndex > 0 ? (
+            <div className="mt-8 flex justify-center sm:mt-9">
+              <Button
+                type="button"
+                variant="secondary"
+                size="md"
+                onClick={handlePrevious}
+                disabled={isActionPending}
+                fullWidth
+                className="h-12 max-w-[20rem] text-[#2f6d55]"
+              >
+                {t("previous")}
+              </Button>
+            </div>
+          ) : null}
         </section>
       </div>
     </div>
