@@ -207,14 +207,19 @@ const UI_TEXT = {
     ko: "언어 변경",
   },
   loadingResultPoster: {
-    zh: "正在加载结果图…",
+    zh: "正在努力加载结果海报…",
     en: "Loading your result poster…",
-    ko: "결과 이미지를 불러오는 중…",
+    ko: "결과 포스터를 불러오는 중…",
+  },
+  loadingPosterThumb: {
+    zh: "海报加载中…",
+    en: "Loading poster…",
+    ko: "포스터 불러오는 중…",
   },
   resultPosterLoadFailed: {
-    zh: "结果图加载失败",
-    en: "Failed to load result poster",
-    ko: "결과 이미지를 불러오지 못했어요",
+    zh: "图片加载失败",
+    en: "Failed to load image",
+    ko: "이미지를 불러오지 못했어요",
   },
   atlasScrollHint: {
     zh: "下滑查看 15 种 CP 结果图鉴",
