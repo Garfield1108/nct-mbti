@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useRef } from "react";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { useTranslations } from "@/components/locale-provider";
-import { StartTestButton } from "@/components/start-test-button";
 import { RESULT_COUNT } from "@/data/results";
 import { formatPairCount } from "@/lib/locale";
+import { buttonClasses } from "@/components/ui/button";
 
 type SparkleConfig = {
   top?: string;
@@ -74,8 +73,8 @@ function ChevronDown() {
 }
 
 export function HomeHero() {
-  const router = useRouter();
   const { locale, t } = useTranslations();
+  const [isStarting, setIsStarting] = useState(false);
   const chestRef = useRef<HTMLDivElement>(null);
   const metaItems = [
     { label: t("aboutMinutes"), icon: "clock" as const },
@@ -107,10 +106,6 @@ export function HomeHero() {
       block: "start",
     });
   };
-
-  useEffect(() => {
-    void router.prefetch("/quiz");
-  }, [router]);
 
   return (
     <section className="relative min-h-screen overflow-hidden bg-white">
@@ -242,11 +237,18 @@ export function HomeHero() {
           </div>
 
           <div className="mt-2 flex w-full flex-col items-center px-2.5">
-            <StartTestButton
-              size="xl"
-              fullWidth
-              className="max-w-[20rem]"
-            />
+            <a
+              href="/quiz"
+              onPointerDown={() => setIsStarting(true)}
+              className={`${buttonClasses({ size: "xl", variant: "primary", fullWidth: true })} max-w-[20rem]`}
+            >
+              <span className="inline-flex items-center gap-2">
+                {isStarting ? (
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-current/30 border-t-current" />
+                ) : null}
+                {isStarting ? t("openingTest") : t("startTest")}
+              </span>
+            </a>
 
             <button
               type="button"

@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useTranslations } from "@/components/locale-provider";
 import { buttonClasses } from "@/components/ui/button";
 
@@ -19,17 +18,8 @@ export function StartTestButton({
   variant = "primary",
   fullWidth = false,
 }: StartTestButtonProps) {
-  const router = useRouter();
   const { t } = useTranslations();
   const [isStarting, setIsStarting] = useState(false);
-
-  useEffect(() => {
-    void router.prefetch("/quiz");
-  }, [router]);
-
-  const prefetchQuiz = () => {
-    void router.prefetch("/quiz");
-  };
 
   const markStarting = () => {
     setIsStarting(true);
@@ -40,8 +30,6 @@ export function StartTestButton({
       href="/quiz"
       prefetch
       onClick={markStarting}
-      onMouseEnter={prefetchQuiz}
-      onTouchStart={prefetchQuiz}
       aria-busy={isStarting}
       className={`${buttonClasses({ variant, size, fullWidth })} ${className}`.trim()}
     >
