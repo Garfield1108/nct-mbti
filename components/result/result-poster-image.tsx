@@ -98,6 +98,7 @@ export function ResultPosterImage({
   };
 
   const isHero = variant === "hero";
+  const isAtlasLike = variant !== "hero";
 
   return (
     <div
@@ -122,19 +123,25 @@ export function ResultPosterImage({
             } ${imageClassName}`.trim()}
           />
           {!isLoaded ? (
-            <div className="soft-shimmer absolute inset-0" aria-hidden="true" />
+            <div
+              className="soft-shimmer absolute inset-0 z-10"
+              aria-hidden="true"
+            />
           ) : null}
           {showLoadingText ? (
             <div
-              className={`pointer-events-none absolute inset-x-0 ${
-                isHero ? "bottom-0 p-4" : "bottom-2 px-2"
+              className={`pointer-events-none absolute inset-x-0 z-20 ${
+                isHero ? "bottom-0 p-4" : "inset-y-0 flex items-end justify-center px-2 pb-2"
               }`}
             >
+              {isHero ? (
+                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white/70 via-white/26 to-transparent" />
+              ) : null}
               <div
-                className={`mx-auto flex w-fit max-w-[88%] items-center gap-1.5 rounded-full ${
+                className={`relative mx-auto flex w-fit max-w-[88%] items-center gap-1.5 rounded-full ${
                   isHero
-                    ? "bg-white/76 px-3.5 py-2 text-[0.82rem] text-[#345747] shadow-[0_8px_22px_rgba(28,40,35,0.07)] backdrop-blur-[3px]"
-                    : "bg-white/72 px-2.5 py-1.5 text-[0.68rem] text-[#456b59] shadow-[0_6px_16px_rgba(28,40,35,0.06)] backdrop-blur-[2px]"
+                    ? "bg-white/82 px-3.5 py-2 text-[0.82rem] text-[#345747] shadow-[0_8px_22px_rgba(28,40,35,0.07)] backdrop-blur-[3px]"
+                    : "bg-white/82 px-2.5 py-1.5 text-[0.68rem] text-[#456b59] shadow-[0_6px_16px_rgba(28,40,35,0.06)] backdrop-blur-[2px]"
                 }`}
               >
                 <span className="inline-flex items-center gap-1" aria-hidden="true">
@@ -142,13 +149,19 @@ export function ResultPosterImage({
                   <span className="h-1.5 w-1.5 rounded-full bg-[#8abca0] animate-pulse [animation-delay:120ms]" />
                   <span className="h-1.5 w-1.5 rounded-full bg-[#9bc7ad] animate-pulse [animation-delay:240ms]" />
                 </span>
-                <span className="truncate font-medium">{loadingText}</span>
+                <span
+                  className={`truncate font-medium ${
+                    isAtlasLike ? "max-w-[10rem]" : "max-w-[15rem]"
+                  }`}
+                >
+                  {loadingText}
+                </span>
               </div>
             </div>
           ) : null}
         </>
       ) : (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 px-3 text-center text-[#2f6f55]">
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-1.5 px-3 text-center text-[#2f6f55]">
           <p className="text-[0.74rem] font-semibold leading-4">{pair}</p>
           <p className="text-[0.7rem] font-medium leading-4 text-[#557766]">
             {typeName}
