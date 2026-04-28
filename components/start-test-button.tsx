@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { flushSync } from "react-dom";
 import { useTranslations } from "@/components/locale-provider";
 import { clearQuizState } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
@@ -22,29 +23,38 @@ export function StartTestButton({
   const router = useRouter();
   const { t } = useTranslations();
   const [isNavigating, setIsNavigating] = useState(false);
-  const [isPending, startTransition] = useTransition();
-  const isLoading = isNavigating || isPending;
+  const isLoading = isNavigating;
+
+  useEffect(() => {
+    void router.prefetch("/quiz");
+  }, [router]);
+
+  const prefetchQuiz = () => {
+    void router.prefetch("/quiz");
+  };
 
   const handleStart = () => {
     if (isLoading) {
       return;
     }
 
-    setIsNavigating(true);
-    clearQuizState();
-
-    window.requestAnimationFrame(() => {
-      startTransition(() => {
-        router.push("/quiz");
-      });
+    flushSync(() => {
+      setIsNavigating(true);
     });
+
+    clearQuizState();
+    prefetchQuiz();
+    router.push("/quiz");
   };
 
   return (
     <Button
       type="button"
       onClick={handleStart}
+      onMouseEnter={prefetchQuiz}
+      onTouchStart={prefetchQuiz}
       disabled={isLoading}
+      aria-busy={isLoading}
       size={size}
       variant={variant}
       fullWidth={fullWidth}

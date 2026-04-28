@@ -1,7 +1,13 @@
 import type { ResultId } from "@/lib/types";
 
-export const getResultPosterPath = (resultId: ResultId | string) =>
+export const getResultPosterSrc = (resultId: ResultId | string) =>
   `/results/${resultId}.png`;
 
-export const getResultPosterThumbPath = (resultId: ResultId | string) =>
+export const getResultThumbSrc = (resultId: ResultId | string) =>
   `/results/thumbs/${resultId}.webp`;
+
+export const getResultDisplayPosterSrc = (resultId: ResultId | string) =>
+  `/results/webp/${resultId}.webp`;
+
+export const getResultPosterPath = getResultPosterSrc;
+export const getResultPosterThumbPath = getResultThumbSrc;

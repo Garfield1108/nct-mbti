@@ -7,7 +7,7 @@
     "prebuild": "node scripts/generate-result-thumbs.mjs",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint .",
     "sync:cpinfo": "node scripts/sync-cpinfo.mjs"
   },
   "dependencies": {

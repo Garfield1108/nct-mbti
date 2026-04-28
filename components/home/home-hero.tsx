@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { useTranslations } from "@/components/locale-provider";
 import { StartTestButton } from "@/components/start-test-button";
@@ -73,6 +74,7 @@ function ChevronDown() {
 }
 
 export function HomeHero() {
+  const router = useRouter();
   const { locale, t } = useTranslations();
   const chestRef = useRef<HTMLDivElement>(null);
   const metaItems = [
@@ -105,6 +107,10 @@ export function HomeHero() {
       block: "start",
     });
   };
+
+  useEffect(() => {
+    void router.prefetch("/quiz");
+  }, [router]);
 
   return (
     <section className="relative min-h-screen overflow-hidden bg-white">

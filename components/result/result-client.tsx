@@ -6,11 +6,12 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "@/components/locale-provider";
 import { RESULTS } from "@/data/results";
 import { getLocalizedResultContent } from "@/lib/result-localization";
+import { getPosterAltText } from "@/lib/locale";
 import { computeQuizResult } from "@/lib/scoring";
 import { clearQuizState, loadQuizState } from "@/lib/storage";
 import type { RankedResult, ResultProfile } from "@/lib/types";
+import { ResultPosterImage } from "@/components/result/result-poster-image";
 import { Button } from "@/components/ui/button";
-import { ResultVisual } from "@/components/result/result-visual";
 
 interface ResultClientProps {
   result: ResultProfile;
@@ -132,7 +133,16 @@ export function ResultClient({ result }: ResultClientProps) {
         <section className="rounded-[28px] border border-[var(--line)] bg-[linear-gradient(180deg,#f8faf8_0%,#ffffff_48%,#f4f7f5_100%)] p-5 shadow-[0_18px_50px_rgba(28,40,35,0.06)] sm:p-6 lg:px-9 lg:py-8">
           <div className="grid items-center gap-5 lg:grid-cols-[minmax(18rem,21.5rem)_minmax(0,1fr)] lg:gap-8">
             <div className="mx-auto w-full max-w-[17.25rem] min-w-0 sm:max-w-[18.75rem] lg:mx-0 lg:max-w-[21.5rem]">
-              <ResultVisual result={result} />
+              <ResultPosterImage
+                resultId={result.id}
+                alt={getPosterAltText(locale, result.pair)}
+                pair={result.pair}
+                typeName={localizedResult.typeName}
+                variant="hero"
+                priority
+                className="rounded-[20px] border border-[var(--line)] bg-white shadow-[0_18px_42px_rgba(28,40,35,0.08)] sm:rounded-[30px]"
+                imageClassName="rounded-[20px] p-1.5 sm:rounded-[24px] sm:p-2"
+              />
             </div>
 
             <div className="min-w-0 text-center lg:text-left">
@@ -226,7 +236,15 @@ export function ResultClient({ result }: ResultClientProps) {
                   className="flex min-h-[7.5rem] items-center gap-3 overflow-hidden rounded-[22px] border border-[var(--line)] bg-[var(--surface-soft)] p-3.5 transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_16px_36px_rgba(28,40,35,0.08)] active:scale-[0.99]"
                 >
                   <div className="w-20 shrink-0 sm:w-[5.5rem]">
-                    <ResultVisual result={item} variant="card" />
+                    <ResultPosterImage
+                      resultId={item.id}
+                      alt={getPosterAltText(locale, item.pair)}
+                      pair={item.pair}
+                      typeName={localizedItem.typeName}
+                      variant="card"
+                      className="rounded-[14px] border border-[var(--line)] bg-white shadow-[0_12px_28px_rgba(28,40,35,0.06)] sm:rounded-[16px]"
+                      imageClassName="rounded-[12px] p-1"
+                    />
                   </div>
 
                   <div className="min-w-0">

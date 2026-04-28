@@ -17,29 +17,51 @@ import {
   saveQuizState,
   shouldStartFreshQuiz,
 } from "@/lib/storage";
-import { getResultPosterPath } from "@/lib/share-card";
+import {
+  getResultDisplayPosterSrc,
+  getResultPosterSrc,
+} from "@/lib/share-card";
 import type { StoredQuizState } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/ui/progress-bar";
 
 const LETTERS = ["A", "B", "C", "D"] as const;
 
-function preloadImage(src: string, timeout = 1500) {
+function preloadResultImage(sources: string[], timeout = 1500) {
   return new Promise<void>((resolve) => {
-    const img = new window.Image();
-    const timer = window.setTimeout(resolve, timeout);
+    let settled = false;
+    const timer = window.setTimeout(() => {
+      settled = true;
+      resolve();
+    }, timeout);
 
-    img.onload = () => {
+    const finish = () => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
       window.clearTimeout(timer);
       resolve();
     };
 
-    img.onerror = () => {
-      window.clearTimeout(timer);
-      resolve();
+    const attemptLoad = (index: number) => {
+      if (settled || index >= sources.length) {
+        finish();
+        return;
+      }
+
+      const img = new window.Image();
+
+      img.onload = finish;
+      img.onerror = () => {
+        attemptLoad(index + 1);
+      };
+
+      img.src = sources[index];
     };
 
-    img.src = src;
+    attemptLoad(0);
   });
 }
 
@@ -129,7 +151,10 @@ export function QuizClient() {
           );
 
           setQuizState(nextState);
-          void preloadImage(getResultPosterPath(resultId)).finally(() => {
+          void preloadResultImage(
+            [getResultDisplayPosterSrc(resultId), getResultPosterSrc(resultId)],
+            1500,
+          ).finally(() => {
             startTransition(() => {
               router.push(`/result/${resultId}`);
             });
