@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "@/components/locale-provider";
-import { clearQuizState } from "@/lib/storage";
 import { buttonClasses } from "@/components/ui/button";
 
 type StartTestButtonProps = {
@@ -34,19 +33,13 @@ export function StartTestButton({
 
   const markStarting = () => {
     setIsStarting(true);
-    prefetchQuiz();
-  };
-
-  const handleClick = () => {
-    clearQuizState();
   };
 
   return (
     <Link
       href="/quiz"
       prefetch
-      onClick={handleClick}
-      onPointerDown={markStarting}
+      onClick={markStarting}
       onMouseEnter={prefetchQuiz}
       onTouchStart={prefetchQuiz}
       aria-busy={isStarting}

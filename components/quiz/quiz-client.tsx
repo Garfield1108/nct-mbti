@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "@/components/locale-provider";
 import { QUESTIONS } from "@/data/questions";
@@ -85,11 +85,6 @@ export function QuizClient() {
     };
   });
   const [isPending, startTransition] = useTransition();
-  const hasHydrated = useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false,
-  );
 
   const currentQuestion = QUESTIONS[quizState.currentIndex];
   const selectedOptionId = currentQuestion
@@ -174,7 +169,7 @@ export function QuizClient() {
     });
   };
 
-  if (!hasHydrated || !currentQuestion) {
+  if (!currentQuestion) {
     return (
       <div className="flex min-h-[calc(100svh-53px)] items-center justify-center px-5 py-12 sm:min-h-[calc(100svh-61px)]">
         <div className="rounded-full bg-[var(--surface-soft)] px-4 py-2 text-sm text-[var(--muted)]">
