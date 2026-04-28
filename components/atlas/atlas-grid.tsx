@@ -18,12 +18,12 @@ export function AtlasGrid({ className = "" }: AtlasGridProps) {
 
   return (
     <div
-      className={`grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4 xl:grid-cols-5 ${className}`.trim()}
+      className={`grid grid-cols-2 gap-3.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4 xl:grid-cols-5 ${className}`.trim()}
     >
       {atlasResults.map(({ result, localized }) => (
         <article
           key={result.id}
-          className="group flex h-full flex-col rounded-[20px] border border-[var(--line)] bg-white/92 p-2.5 shadow-[0_12px_30px_rgba(28,40,35,0.05)] transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_18px_34px_rgba(28,40,35,0.08)] sm:rounded-[24px] sm:p-3"
+          className="group flex h-full flex-col rounded-[20px] border border-[var(--line)] bg-white/92 p-[0.7rem] shadow-[0_12px_30px_rgba(28,40,35,0.05)] transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_18px_34px_rgba(28,40,35,0.08)] sm:rounded-[24px] sm:p-3"
         >
           <AtlasPoster
             resultId={result.id}

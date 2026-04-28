@@ -55,6 +55,7 @@ export function ResultPosterImage({
   const currentSrc = sources[sourceIndex];
   const loadingText =
     variant === "hero" ? t("loadingResultPoster") : t("loadingPosterThumb");
+  const loadingDelay = variant === "hero" ? 300 : 0;
 
   const clearLoadingTimer = () => {
     if (loadingTimerRef.current !== null) {
@@ -69,13 +70,13 @@ export function ResultPosterImage({
     if (!isLoaded && !hasError) {
       loadingTimerRef.current = window.setTimeout(() => {
         setShowLoadingText(true);
-      }, 300);
+      }, loadingDelay);
     }
 
     return () => {
       clearLoadingTimer();
     };
-  }, [currentSrc, hasError, isLoaded]);
+  }, [currentSrc, hasError, isLoaded, loadingDelay]);
 
   const handleLoad = () => {
     clearLoadingTimer();
@@ -98,8 +99,6 @@ export function ResultPosterImage({
   };
 
   const isHero = variant === "hero";
-  const isAtlasLike = variant !== "hero";
-
   return (
     <div
       className={`relative aspect-[1122/1402] overflow-hidden bg-[linear-gradient(180deg,#f8fbf6_0%,#eef5ef_100%)] ${className}`.trim()}
@@ -130,29 +129,20 @@ export function ResultPosterImage({
           ) : null}
           {showLoadingText ? (
             <div
-              className={`pointer-events-none absolute inset-x-0 z-20 ${
-                isHero ? "bottom-0 p-4" : "inset-y-0 flex items-end justify-center px-2 pb-2"
-              }`}
+              className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center p-3"
             >
               {isHero ? (
-                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white/70 via-white/26 to-transparent" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.48),transparent_72%)]" />
               ) : null}
               <div
-                className={`relative mx-auto flex w-fit max-w-[88%] items-center gap-1.5 rounded-full ${
+                className={`relative mx-auto flex w-fit max-w-full items-center gap-1.5 rounded-full border border-[rgba(47,111,85,0.12)] ${
                   isHero
-                    ? "bg-white/82 px-3.5 py-2 text-[0.82rem] text-[#345747] shadow-[0_8px_22px_rgba(28,40,35,0.07)] backdrop-blur-[3px]"
-                    : "bg-white/82 px-2.5 py-1.5 text-[0.68rem] text-[#456b59] shadow-[0_6px_16px_rgba(28,40,35,0.06)] backdrop-blur-[2px]"
+                    ? "bg-white/82 px-3.5 py-2 text-[0.82rem] text-[#345747] shadow-[0_8px_20px_rgba(20,40,30,0.06)] backdrop-blur-[3px]"
+                    : "bg-white/78 px-3 py-2 text-[0.72rem] text-[#2f6f55] shadow-[0_8px_20px_rgba(20,40,30,0.06)] backdrop-blur-[2px]"
                 }`}
               >
-                <span className="inline-flex items-center gap-1" aria-hidden="true">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#7db291] animate-pulse" />
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#8abca0] animate-pulse [animation-delay:120ms]" />
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#9bc7ad] animate-pulse [animation-delay:240ms]" />
-                </span>
                 <span
-                  className={`truncate font-medium ${
-                    isAtlasLike ? "max-w-[10rem]" : "max-w-[15rem]"
-                  }`}
+                  className={`truncate font-bold ${isHero ? "max-w-[15rem]" : "max-w-[9rem]"}`}
                 >
                   {loadingText}
                 </span>

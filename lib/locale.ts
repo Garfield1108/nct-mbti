@@ -212,9 +212,9 @@ const UI_TEXT = {
     ko: "결과 포스터를 불러오는 중…",
   },
   loadingPosterThumb: {
-    zh: "海报加载中…",
-    en: "Loading poster…",
-    ko: "포스터 불러오는 중…",
+    zh: "图片正在加载中",
+    en: "Loading image",
+    ko: "이미지를 불러오는 중",
   },
   resultPosterLoadFailed: {
     zh: "图片加载失败",
