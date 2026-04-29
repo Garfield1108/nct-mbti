@@ -103,6 +103,12 @@ export function QuizClient() {
     };
   }, []);
 
+  useEffect(() => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+  }, [quizState.currentIndex]);
+
   const clearAdvanceTimer = () => {
     if (advanceTimerRef.current !== null) {
       window.clearTimeout(advanceTimerRef.current);
@@ -231,7 +237,10 @@ export function QuizClient() {
             </h1>
           </div>
 
-          <div className="mt-5 grid gap-2.5 sm:mt-6">
+          <div
+            key={currentQuestion.id}
+            className="mt-5 grid gap-2.5 sm:mt-6"
+          >
             {currentQuestion.options.map((item, index) => {
               const isActive = item.id === selectedOptionId;
 
@@ -242,11 +251,13 @@ export function QuizClient() {
                   onClick={() => handleSelect(item.id)}
                   disabled={isActionPending}
                   className={[
-                    "group flex w-full items-start gap-3 rounded-[18px] border px-4 py-3 text-left transition-all duration-200",
+                    "group flex w-full items-start gap-3 rounded-[18px] border px-4 py-3 text-left outline-none transition-[background-color,border-color,transform] duration-150 focus-visible:ring-2 focus-visible:ring-[#6fb091]/30 focus-visible:ring-offset-0",
                     isActive
-                      ? "border-[#8eb7a0] bg-[#eff7f2] shadow-[0_8px_22px_rgba(47,109,85,0.08)]"
-                      : "border-[var(--line)] bg-white hover:border-[#bfd3c7] hover:bg-[#f7fbf8]",
-                    isActionPending ? "cursor-default" : "",
+                      ? "border-[#8eb7a0] bg-[#eff7f2] shadow-[0_8px_18px_rgba(47,109,85,0.06)]"
+                      : "border-[var(--line)] bg-white shadow-none hover:border-[#bfd3c7] hover:bg-[#f7fbf8]",
+                    isActionPending
+                      ? "cursor-default"
+                      : "active:scale-[0.995] active:bg-[#f2f8f4]",
                   ].join(" ")}
                 >
                   <span
