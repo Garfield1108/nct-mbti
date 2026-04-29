@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useTranslations } from "@/components/locale-provider";
 import type { ResultId } from "@/lib/types";
 import {
   getResultDisplayPosterSrc,
@@ -17,6 +16,11 @@ const variantSizes: Record<ResultPosterVariant, string> = {
   card: "(max-width: 768px) 40vw, 160px",
   atlas: "(max-width: 640px) 46vw, (max-width: 1280px) 24vw, 220px",
 };
+
+const IMAGE_LOADING_TEXT = "Loading image…";
+const RESULT_POSTER_LOADING_TEXT = "Loading your result poster…";
+const IMAGE_ERROR_TEXT = "Failed to load image";
+const RESULT_POSTER_ERROR_TEXT = "Failed to load result poster";
 
 interface ResultPosterImageProps {
   resultId: ResultId | string;
@@ -39,7 +43,6 @@ export function ResultPosterImage({
   className = "",
   imageClassName = "",
 }: ResultPosterImageProps) {
-  const { t } = useTranslations();
   const sources = useMemo(
     () =>
       variant === "hero"
@@ -54,8 +57,10 @@ export function ResultPosterImage({
   const loadingTimerRef = useRef<number | null>(null);
   const currentSrc = sources[sourceIndex];
   const loadingText =
-    variant === "hero" ? t("loadingResultPoster") : t("loadingPosterThumb");
-  const loadingDelay = variant === "hero" ? 300 : 0;
+    variant === "hero" ? RESULT_POSTER_LOADING_TEXT : IMAGE_LOADING_TEXT;
+  const errorText =
+    variant === "hero" ? RESULT_POSTER_ERROR_TEXT : IMAGE_ERROR_TEXT;
+  const loadingDelay = 300;
 
   const clearLoadingTimer = () => {
     if (loadingTimerRef.current !== null) {
@@ -161,7 +166,7 @@ export function ResultPosterImage({
               isHero ? "text-[0.76rem]" : "text-[0.68rem]"
             }`}
           >
-            {t("resultPosterLoadFailed")}
+            {errorText}
           </p>
         </div>
       )}
