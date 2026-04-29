@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "@/components/locale-provider";
 import { buttonClasses } from "@/components/ui/button";
 
@@ -18,27 +18,43 @@ export function StartTestButton({
   variant = "primary",
   fullWidth = false,
 }: StartTestButtonProps) {
+  const router = useRouter();
   const { t } = useTranslations();
   const [isStarting, setIsStarting] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-  const markStarting = () => {
+  const prefetchQuiz = useCallback(() => {
+    router.prefetch("/quiz");
+  }, [router]);
+
+  useEffect(() => {
+    prefetchQuiz();
+  }, [prefetchQuiz]);
+
+  const openQuiz = () => {
     setIsStarting(true);
+
+    startTransition(() => {
+      router.push("/quiz");
+    });
   };
 
   return (
-    <Link
-      href="/quiz"
-      prefetch
-      onClick={markStarting}
-      aria-busy={isStarting}
+    <button
+      type="button"
+      onClick={openQuiz}
+      onMouseEnter={prefetchQuiz}
+      onTouchStart={prefetchQuiz}
+      aria-busy={isStarting || isPending}
+      disabled={isStarting || isPending}
       className={`${buttonClasses({ variant, size, fullWidth })} ${className}`.trim()}
     >
       <span className="inline-flex items-center gap-2">
-        {isStarting ? (
+        {isStarting || isPending ? (
           <span className="h-4 w-4 animate-spin rounded-full border-2 border-current/30 border-t-current" />
         ) : null}
-        {isStarting ? t("openingTest") : t("startTest")}
+        {isStarting || isPending ? t("openingTest") : t("startTest")}
       </span>
-    </Link>
+    </button>
   );
 }

@@ -2,8 +2,10 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
@@ -24,32 +26,49 @@ type LocaleContextValue = {
 
 const LocaleContext = createContext<LocaleContextValue | null>(null);
 
+const documentLanguage = (locale: Locale) =>
+  locale === "en" ? "en" : locale === "ko" ? "ko" : "zh-CN";
+
 export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocale] = useState<Locale>(() => {
+  const [locale, setLocaleState] = useState<Locale>(() => {
     if (typeof window === "undefined") {
       return DEFAULT_LOCALE;
     }
 
-    const storedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY);
-    return isLocale(storedLocale) ? storedLocale : DEFAULT_LOCALE;
+    try {
+      const storedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY);
+      return isLocale(storedLocale) ? storedLocale : DEFAULT_LOCALE;
+    } catch {
+      return DEFAULT_LOCALE;
+    }
   });
 
   useEffect(() => {
-    window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
-    document.documentElement.lang =
-      locale === "en" ? "en" : locale === "ko" ? "ko" : "zh-CN";
+    try {
+      window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+    } catch {}
+
+    document.documentElement.lang = documentLanguage(locale);
   }, [locale]);
 
+  const setLocale = useCallback((nextLocale: Locale) => {
+    setLocaleState((currentLocale) =>
+      currentLocale === nextLocale ? currentLocale : nextLocale,
+    );
+  }, []);
+
+  const t = useCallback((key: UiTextKey) => getUiText(key, locale), [locale]);
+  const value = useMemo(
+    () => ({
+      locale,
+      setLocale,
+      t,
+    }),
+    [locale, setLocale, t],
+  );
+
   return (
-    <LocaleContext.Provider
-      value={{
-        locale,
-        setLocale,
-        t: (key) => getUiText(key, locale),
-      }}
-    >
-      {children}
-    </LocaleContext.Provider>
+    <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>
   );
 }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { AtlasPoster } from "@/components/atlas/atlas-poster";
 import { useTranslations } from "@/components/locale-provider";
 import { RESULTS } from "@/data/results";
@@ -11,10 +12,14 @@ interface AtlasGridProps {
 
 export function AtlasGrid({ className = "" }: AtlasGridProps) {
   const { locale } = useTranslations();
-  const atlasResults = RESULTS.map((result) => ({
-    result,
-    localized: getLocalizedResultContent(result, locale),
-  }));
+  const atlasResults = useMemo(
+    () =>
+      RESULTS.map((result) => ({
+        result,
+        localized: getLocalizedResultContent(result, locale),
+      })),
+    [locale],
+  );
 
   return (
     <div

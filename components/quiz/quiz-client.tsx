@@ -87,6 +87,7 @@ export function QuizClient() {
   });
   const [isPending, startTransition] = useTransition();
   const advanceTimerRef = useRef<number | null>(null);
+  const persistTimerRef = useRef<number | null>(null);
 
   const currentQuestion = QUESTIONS[quizState.currentIndex];
   const selectedOptionId = currentQuestion
@@ -99,6 +100,10 @@ export function QuizClient() {
     return () => {
       if (advanceTimerRef.current !== null) {
         window.clearTimeout(advanceTimerRef.current);
+      }
+
+      if (persistTimerRef.current !== null) {
+        window.clearTimeout(persistTimerRef.current);
       }
     };
   }, []);
@@ -116,9 +121,29 @@ export function QuizClient() {
     }
   };
 
-  const updateQuizState = (nextState: StoredQuizState) => {
+  const queueQuizStatePersistence = (nextState: StoredQuizState) => {
+    if (persistTimerRef.current !== null) {
+      window.clearTimeout(persistTimerRef.current);
+    }
+
+    persistTimerRef.current = window.setTimeout(() => {
+      persistTimerRef.current = null;
+      saveQuizState(nextState);
+    }, 0);
+  };
+
+  const updateQuizState = (
+    nextState: StoredQuizState,
+    persistMode: "deferred" | "immediate" = "deferred",
+  ) => {
     setQuizState(nextState);
-    saveQuizState(nextState);
+
+    if (persistMode === "immediate") {
+      saveQuizState(nextState);
+      return;
+    }
+
+    queueQuizStatePersistence(nextState);
   };
 
   const handleSelect = (optionId: string) => {
@@ -137,7 +162,7 @@ export function QuizClient() {
       updatedAt: new Date().toISOString(),
     };
 
-    updateQuizState(nextState);
+    updateQuizState(nextState, "deferred");
     setIsAdvancing(true);
     clearAdvanceTimer();
 
@@ -176,11 +201,17 @@ export function QuizClient() {
         return;
       }
 
-      updateQuizState({
-        ...nextState,
-        currentIndex: Math.min(QUESTIONS.length - 1, quizState.currentIndex + 1),
-        updatedAt: new Date().toISOString(),
-      });
+      updateQuizState(
+        {
+          ...nextState,
+          currentIndex: Math.min(
+            QUESTIONS.length - 1,
+            quizState.currentIndex + 1,
+          ),
+          updatedAt: new Date().toISOString(),
+        },
+        "deferred",
+      );
       setIsAdvancing(false);
     }, 220);
   };
@@ -188,11 +219,14 @@ export function QuizClient() {
   const handlePrevious = () => {
     clearAdvanceTimer();
     setIsAdvancing(false);
-    updateQuizState({
-      ...quizState,
-      currentIndex: Math.max(0, quizState.currentIndex - 1),
-      updatedAt: new Date().toISOString(),
-    });
+    updateQuizState(
+      {
+        ...quizState,
+        currentIndex: Math.max(0, quizState.currentIndex - 1),
+        updatedAt: new Date().toISOString(),
+      },
+      "deferred",
+    );
   };
 
   if (!currentQuestion) {
