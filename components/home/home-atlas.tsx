@@ -41,16 +41,10 @@ export function HomeAtlas() {
       return;
     }
 
-    let timeoutId: number | null = null;
-    let idleId: number | null = null;
     const section = sectionRef.current;
     const activateGrid = () => {
       setShouldRenderGrid(true);
     };
-    const requestIdle =
-      "requestIdleCallback" in window ? window.requestIdleCallback : null;
-    const cancelIdle =
-      "cancelIdleCallback" in window ? window.cancelIdleCallback : null;
 
     const observer =
       typeof IntersectionObserver === "undefined" || !section
@@ -66,24 +60,12 @@ export function HomeAtlas() {
 
     if (observer && section) {
       observer.observe(section);
-    }
-
-    if (requestIdle) {
-      idleId = requestIdle(activateGrid, { timeout: 1200 });
     } else {
-      timeoutId = window.setTimeout(activateGrid, 1200);
+      activateGrid();
     }
 
     return () => {
       observer?.disconnect();
-
-      if (idleId !== null && cancelIdle) {
-        cancelIdle(idleId);
-      }
-
-      if (timeoutId !== null) {
-        window.clearTimeout(timeoutId);
-      }
     };
   }, [shouldRenderGrid]);
 

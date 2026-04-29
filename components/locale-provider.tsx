@@ -30,24 +30,9 @@ const documentLanguage = (locale: Locale) =>
   locale === "en" ? "en" : locale === "ko" ? "ko" : "zh-CN";
 
 export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(() => {
-    if (typeof window === "undefined") {
-      return DEFAULT_LOCALE;
-    }
-
-    try {
-      const storedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY);
-      return isLocale(storedLocale) ? storedLocale : DEFAULT_LOCALE;
-    } catch {
-      return DEFAULT_LOCALE;
-    }
-  });
+  const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
 
   useEffect(() => {
-    try {
-      window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
-    } catch {}
-
     document.documentElement.lang = documentLanguage(locale);
   }, [locale]);
 
@@ -55,6 +40,27 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     setLocaleState((currentLocale) =>
       currentLocale === nextLocale ? currentLocale : nextLocale,
     );
+
+    try {
+      window.localStorage.setItem(LOCALE_STORAGE_KEY, nextLocale);
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    const syncStoredLocale = window.setTimeout(() => {
+      try {
+        const storedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY);
+        if (isLocale(storedLocale)) {
+          setLocaleState((currentLocale) =>
+            currentLocale === storedLocale ? currentLocale : storedLocale,
+          );
+        }
+      } catch {}
+    }, 0);
+
+    return () => {
+      window.clearTimeout(syncStoredLocale);
+    };
   }, []);
 
   const t = useCallback((key: UiTextKey) => getUiText(key, locale), [locale]);
