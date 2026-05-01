@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "@/components/locale-provider";
 import { buttonClasses } from "@/components/ui/button";
 
@@ -20,16 +19,35 @@ export function StartTestButton({
 }: StartTestButtonProps) {
   const { t } = useTranslations();
   const [isStarting, setIsStarting] = useState(false);
+  const fallbackTimerRef = useRef<number | null>(null);
+
   const handleStart = () => {
     if (isStarting) {
       return;
     }
 
     setIsStarting(true);
+
+    if (fallbackTimerRef.current !== null) {
+      window.clearTimeout(fallbackTimerRef.current);
+    }
+
+    fallbackTimerRef.current = window.setTimeout(() => {
+      fallbackTimerRef.current = null;
+
+      if (window.location.pathname !== "/quiz") {
+        window.location.assign("/quiz");
+      }
+    }, 500);
   };
 
   useEffect(() => {
     const resetStarting = () => {
+      if (fallbackTimerRef.current !== null) {
+        window.clearTimeout(fallbackTimerRef.current);
+        fallbackTimerRef.current = null;
+      }
+
       setIsStarting(false);
     };
 
@@ -39,13 +57,16 @@ export function StartTestButton({
     return () => {
       window.removeEventListener("pageshow", resetStarting);
       window.removeEventListener("focus", resetStarting);
+
+      if (fallbackTimerRef.current !== null) {
+        window.clearTimeout(fallbackTimerRef.current);
+      }
     };
   }, []);
 
   return (
-    <Link
+    <a
       href="/quiz"
-      prefetch
       onClick={handleStart}
       aria-busy={isStarting}
       className={`${buttonClasses({ variant, size, fullWidth })} ${className}`.trim()}
@@ -56,6 +77,6 @@ export function StartTestButton({
         ) : null}
         {isStarting ? t("openingTest") : t("startTest")}
       </span>
-    </Link>
+    </a>
   );
 }
